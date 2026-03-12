@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#24273a"/>
+      <stop offset="100%" style="stop-color:#181825"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#b4befe"/>
+      <stop offset="100%" style="stop-color:#89b4fa"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="1024" height="1024" rx="220" ry="220" fill="url(#bg)"/>
+
+  <!-- Subtle inner border -->
+  <rect width="1024" height="1024" rx="220" ry="220"
+        fill="none" stroke="#313244" stroke-width="3"/>
+
+  <!-- OSC broadcast arcs (right side, suggesting signal/network) -->
+  <!-- Outermost arc -->
+  <path d="M 590 260 A 290 290 0 0 1 590 764"
+        fill="none" stroke="#45475a" stroke-width="28"
+        stroke-linecap="round"/>
+  <!-- Middle arc -->
+  <path d="M 590 340 A 200 200 0 0 1 590 684"
+        fill="none" stroke="#585b70" stroke-width="28"
+        stroke-linecap="round"/>
+  <!-- Inner arc -->
+  <path d="M 590 420 A 110 110 0 0 1 590 604"
+        fill="none" stroke="#6c7086" stroke-width="28"
+        stroke-linecap="round"/>
+
+  <!-- Same arcs in accent colour, glowing -->
+  <path d="M 590 260 A 290 290 0 0 1 590 764"
+        fill="none" stroke="url(#accent)" stroke-width="18"
+        stroke-linecap="round" opacity="0.9" filter="url(#glow)"/>
+  <path d="M 590 340 A 200 200 0 0 1 590 684"
+        fill="none" stroke="url(#accent)" stroke-width="18"
+        stroke-linecap="round" opacity="0.75" filter="url(#glow)"/>
+  <path d="M 590 420 A 110 110 0 0 1 590 604"
+        fill="none" stroke="url(#accent)" stroke-width="18"
+        stroke-linecap="round" opacity="0.6" filter="url(#glow)"/>
+
+  <!-- Target ring — outer -->
+  <circle cx="430" cy="512" r="190"
+          fill="none" stroke="#313244" stroke-width="28"/>
+  <circle cx="430" cy="512" r="190"
+          fill="none" stroke="url(#accent)" stroke-width="18"
+          opacity="0.9" filter="url(#glow)"/>
+
+  <!-- Target ring — inner -->
+  <circle cx="430" cy="512" r="100"
+          fill="none" stroke="#313244" stroke-width="28"/>
+  <circle cx="430" cy="512" r="100"
+          fill="none" stroke="url(#accent)" stroke-width="18"
+          opacity="0.85" filter="url(#glow)"/>
+
+  <!-- Centre dot -->
+  <circle cx="430" cy="512" r="38" fill="#313244"/>
+  <circle cx="430" cy="512" r="28" fill="url(#accent)"
+          filter="url(#glow)"/>
+</svg>

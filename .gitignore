@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+*.egg-info/
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Build tools
+.build-tools/
+
+# App config (user-specific, not source)
+# ~/.config/oscapp/ is outside the project so nothing to ignore here
+
+# macOS
+.DS_Store
+*.dmg
+
+# Editor
+.idea/
+.vscode/
+*.swp
+.claude/

@@ -1,0 +1,3 @@
+PySide6>=6.6.0
+pynput>=1.7.6
+python-osc>=1.8.3
