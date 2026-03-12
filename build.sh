@@ -66,6 +66,7 @@ pyinstaller \
   --onedir \
   --collect-all PySide6 \
   --collect-all pynput \
+  --collect-all Xlib \
   "${EXTRA_ARGS[@]}" \
   "$ENTRY"
 
