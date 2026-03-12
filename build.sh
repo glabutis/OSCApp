@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Build OSCApp into a distributable package for the current platform.
+# Build Dispatch into a distributable package for the current platform.
 #
-# macOS  → dist/OSCApp.dmg   (drag-to-Applications installer)
-# Linux  → dist/OSCApp.AppImage  (single portable executable)
+# macOS  → dist/Dispatch.dmg   (drag-to-Applications installer)
+# Linux  → dist/Dispatch.AppImage  (single portable executable)
 #
 # Usage:
 #   ./build.sh           — build for current platform
@@ -13,9 +13,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-APP_NAME="OSCApp"
+APP_NAME="Dispatch"
 APP_VERSION="0.1.0"
-BUNDLE_ID="com.oscapp.OSCApp"
+BUNDLE_ID="com.dispatch.Dispatch"
 ENTRY="main.py"
 
 # ── Colour helpers ────────────────────────────────────────────────────────────
@@ -143,7 +143,7 @@ elif [[ "$PLATFORM" == "Linux" ]]; then
   cat > "$APPDIR/AppRun" <<'APPRUN'
 #!/usr/bin/env bash
 HERE="$(dirname "$(readlink -f "$0")")"
-exec "$HERE/usr/bin/OSCApp" "$@"
+exec "$HERE/usr/bin/Dispatch" "$@"
 APPRUN
   chmod +x "$APPDIR/AppRun"
 
@@ -151,8 +151,8 @@ APPRUN
   cat > "$APPDIR/${APP_NAME}.desktop" <<DESKTOP
 [Desktop Entry]
 Name=${APP_NAME}
-Exec=OSCApp
-Icon=OSCApp
+Exec=Dispatch
+Icon=Dispatch
 Type=Application
 Categories=AudioVideo;Utility;
 Comment=Map slide remote keystrokes to OSC commands

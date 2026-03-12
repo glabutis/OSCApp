@@ -8,9 +8,11 @@ from .key_utils import key_display
 
 
 class MappingRow(QFrame):
-    edit_requested = Signal(str)    # mapping id
-    delete_requested = Signal(str)  # mapping id
+    edit_requested = Signal(str)          # mapping id
+    delete_requested = Signal(str)        # mapping id
     toggle_requested = Signal(str, bool)  # mapping id, enabled
+    duplicate_requested = Signal(str)     # mapping id
+    test_requested = Signal(str)          # mapping id
 
     def __init__(self, mapping: Mapping, parent=None) -> None:
         super().__init__(parent)
@@ -74,6 +76,22 @@ class MappingRow(QFrame):
         self._osc_lbl.setObjectName("mappingOsc")
         layout.addWidget(self._osc_lbl, 1)
 
+        # ── Test ─────────────────────────────────────────────────────────────
+        test_btn = QPushButton("▶")
+        test_btn.setObjectName("testButton")
+        test_btn.setFixedSize(28, 28)
+        test_btn.setToolTip("Send this OSC command now")
+        test_btn.clicked.connect(lambda: self.test_requested.emit(self.mapping_id))
+        layout.addWidget(test_btn)
+
+        # ── Copy ─────────────────────────────────────────────────────────────
+        copy_btn = QPushButton("Copy")
+        copy_btn.setObjectName("rowButton")
+        copy_btn.setFixedWidth(56)
+        copy_btn.setToolTip("Duplicate this mapping")
+        copy_btn.clicked.connect(lambda: self.duplicate_requested.emit(self.mapping_id))
+        layout.addWidget(copy_btn)
+
         # ── Edit ─────────────────────────────────────────────────────────────
         edit_btn = QPushButton("Edit")
         edit_btn.setObjectName("rowButton")
@@ -94,7 +112,6 @@ class MappingRow(QFrame):
         obj_map = {"short": "badgeShort", "long": "badgeLong", "any": "badgeAny"}
         self._badge_lbl.setText(name_map.get(press_type, press_type.upper()))
         self._badge_lbl.setObjectName(obj_map.get(press_type, "badgeAny"))
-        # Force Qt to re-apply the style
         self._badge_lbl.style().unpolish(self._badge_lbl)
         self._badge_lbl.style().polish(self._badge_lbl)
 

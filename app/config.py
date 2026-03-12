@@ -4,7 +4,7 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from typing import List
 
-CONFIG_DIR = os.path.expanduser("~/.config/oscapp")
+CONFIG_DIR = os.path.expanduser("~/.config/dispatch")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 
 

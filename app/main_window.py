@@ -1,20 +1,26 @@
 """Main application window."""
 
 import sys
-from typing import Callable, Optional
+import uuid
+from datetime import datetime
+from typing import Callable
 
 from PySide6.QtCore import QObject, QTimer, Qt, Signal, Slot
-from PySide6.QtGui import QIntValidator
+from PySide6.QtGui import QAction, QIntValidator
 from PySide6.QtWidgets import (
+    QApplication,
     QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QMainWindow,
+    QMenu,
     QMessageBox,
+    QPlainTextEdit,
     QPushButton,
     QScrollArea,
     QSizePolicy,
+    QSystemTrayIcon,
     QVBoxLayout,
     QWidget,
 )
@@ -44,6 +50,7 @@ class MainWindow(QMainWindow):
         self.config = config
         self._rows: dict[str, MappingRow] = {}
         self._pending_captures: list[Callable[[str], None]] = []
+        self._active = True  # master OSC enable flag
 
         # OSC sender
         self._osc = OSCSender(config.osc.host, config.osc.port)
@@ -60,14 +67,11 @@ class MainWindow(QMainWindow):
 
         self._build_ui()
         self._start_listener()
+        self._setup_tray()
 
     # ── Keyboard capture API (called by MappingDialog via signal) ─────────────
 
     def request_key_capture(self, callback: Callable[[str], None]) -> None:
-        """
-        Ask the global listener to intercept the next keypress and deliver
-        it to *callback* in the main thread.
-        """
         self._pending_captures.append(callback)
         self._listener.capture_next_key(
             lambda ks: self._bridge.key_captured.emit(ks)
@@ -86,7 +90,8 @@ class MainWindow(QMainWindow):
     @Slot(str, str)
     def _on_action(self, key_str: str, press_type: str) -> None:
         """Runs in main thread. Looks up matching mappings and fires OSC."""
-        triggered_any = False
+        if not self._active:
+            return
         for mapping in self.config.mappings:
             if not mapping.enabled:
                 continue
@@ -95,15 +100,13 @@ class MainWindow(QMainWindow):
             if mapping.press_type not in (press_type, "any"):
                 continue
             ok, err = self._osc.send(mapping.osc_address, mapping.osc_args)
-            triggered_any = True
-            status_char = "✓" if ok else "✗"
-            level = "success" if ok else "error"
-            self._set_status(
-                f"{status_char} [{mapping.name}]  {mapping.osc_address}",
-                level,
-            )
-            if not ok:
-                self._set_status(f"✗ OSC error: {err}", "error")
+            self._append_log(ok, mapping.osc_address, mapping.osc_args)
+            if ok:
+                self._set_status(
+                    f"✓ [{mapping.name}]  {mapping.osc_address}", "success"
+                )
+            else:
+                self._set_status(f"✗ [{mapping.name}]  {err}", "error")
 
     @Slot(str)
     def _on_key_captured(self, key_str: str) -> None:
@@ -115,7 +118,7 @@ class MainWindow(QMainWindow):
     # ── UI construction ──────────────────────────────────────────────────────
 
     def _build_ui(self) -> None:
-        self.setWindowTitle("OSCApp")
+        self.setWindowTitle("Dispatch")
         self.setMinimumSize(720, 520)
         self.resize(860, 620)
 
@@ -128,6 +131,8 @@ class MainWindow(QMainWindow):
         layout.addWidget(self._make_header())
         layout.addWidget(self._make_connection_section())
         layout.addWidget(self._make_mappings_section(), 1)
+        self._log_panel = self._make_log_panel()
+        layout.addWidget(self._log_panel)
         layout.addWidget(self._make_status_bar())
 
     # ── Header ────────────────────────────────────────────────────────────────
@@ -143,11 +148,23 @@ class MainWindow(QMainWindow):
         icon.setObjectName("headerIcon")
         layout.addWidget(icon)
 
-        title = QLabel("OSCApp")
+        title = QLabel("Dispatch")
         title.setObjectName("headerTitle")
         layout.addWidget(title)
 
         layout.addStretch()
+
+        self._pause_btn = QPushButton("⏸  Pause")
+        self._pause_btn.setObjectName("headerButton")
+        self._pause_btn.setToolTip("Pause all OSC output without stopping the listener")
+        self._pause_btn.clicked.connect(self._toggle_active)
+        layout.addWidget(self._pause_btn)
+
+        self._log_btn = QPushButton("Log ▾")
+        self._log_btn.setObjectName("headerButton")
+        self._log_btn.setToolTip("Show / hide OSC message log")
+        self._log_btn.clicked.connect(self._toggle_log)
+        layout.addWidget(self._log_btn)
 
         settings_btn = QPushButton("⚙  Settings")
         settings_btn.setObjectName("headerButton")
@@ -242,14 +259,14 @@ class MainWindow(QMainWindow):
         col_frame = QFrame()
         col_frame.setObjectName("colHeader")
         col_layout = QHBoxLayout(col_frame)
-        col_layout.setContentsMargins(46, 2, 12, 2)  # align with row content
+        col_layout.setContentsMargins(46, 2, 12, 2)
         col_layout.setSpacing(12)
         for text, min_w, stretch in [
             ("Name", 130, 0),
             ("Key", 90, 0),
             ("Type", 52, 0),
             ("OSC Address", 0, 1),
-            ("", 56 + 28 + 12, 0),  # spacer for Edit + Delete buttons
+            ("", 28 + 12 + 56 + 12 + 56 + 28, 0),  # spacer: ▶ + Copy + Edit + Delete
         ]:
             lbl = QLabel(text)
             lbl.setObjectName("colHeaderLabel")
@@ -285,6 +302,27 @@ class MainWindow(QMainWindow):
 
         return outer
 
+    # ── OSC Log panel ─────────────────────────────────────────────────────────
+
+    def _make_log_panel(self) -> QFrame:
+        frame = QFrame()
+        frame.setObjectName("logPanelFrame")
+        frame.setFixedHeight(150)
+        frame.setVisible(False)
+
+        layout = QVBoxLayout(frame)
+        layout.setContentsMargins(20, 8, 20, 8)
+        layout.setSpacing(0)
+
+        self._log_edit = QPlainTextEdit()
+        self._log_edit.setObjectName("oscLogEdit")
+        self._log_edit.setReadOnly(True)
+        self._log_edit.setMaximumBlockCount(200)
+        self._log_edit.setPlaceholderText("OSC messages will appear here…")
+        layout.addWidget(self._log_edit)
+
+        return frame
+
     # ── Status bar ────────────────────────────────────────────────────────────
 
     def _make_status_bar(self) -> QFrame:
@@ -317,7 +355,8 @@ class MainWindow(QMainWindow):
         row.edit_requested.connect(self._edit_mapping)
         row.delete_requested.connect(self._delete_mapping)
         row.toggle_requested.connect(self._toggle_mapping)
-        # Insert before the stretch spacer
+        row.duplicate_requested.connect(self._duplicate_mapping)
+        row.test_requested.connect(self._test_mapping)
         insert_at = self._rows_layout.count() - 1
         self._rows_layout.insertWidget(insert_at, row)
         self._rows[mapping.id] = row
@@ -374,6 +413,111 @@ class MainWindow(QMainWindow):
                 break
         self.config.save()
 
+    def _duplicate_mapping(self, mapping_id: str) -> None:
+        mapping = next((m for m in self.config.mappings if m.id == mapping_id), None)
+        if not mapping:
+            return
+        dup = mapping.copy()
+        dup.id = str(uuid.uuid4())
+        dup.name = f"Copy of {mapping.name}"
+
+        # Insert after the original in the config list
+        orig_idx = next(i for i, m in enumerate(self.config.mappings) if m.id == mapping_id)
+        self.config.mappings.insert(orig_idx + 1, dup)
+
+        # Build row and insert after the original row widget
+        row = MappingRow(dup)
+        row.edit_requested.connect(self._edit_mapping)
+        row.delete_requested.connect(self._delete_mapping)
+        row.toggle_requested.connect(self._toggle_mapping)
+        row.duplicate_requested.connect(self._duplicate_mapping)
+        row.test_requested.connect(self._test_mapping)
+        orig_row = self._rows.get(mapping_id)
+        if orig_row:
+            insert_at = self._rows_layout.indexOf(orig_row) + 1
+        else:
+            insert_at = self._rows_layout.count() - 1
+        self._rows_layout.insertWidget(insert_at, row)
+        self._rows[dup.id] = row
+        self.config.save()
+
+    def _test_mapping(self, mapping_id: str) -> None:
+        mapping = next((m for m in self.config.mappings if m.id == mapping_id), None)
+        if not mapping:
+            return
+        ok, err = self._osc.send(mapping.osc_address, mapping.osc_args)
+        self._append_log(ok, mapping.osc_address, mapping.osc_args)
+        if ok:
+            self._set_status(f"✓ Test [{mapping.name}]  {mapping.osc_address}", "success")
+        else:
+            self._set_status(f"✗ Test failed [{mapping.name}]  {err}", "error")
+
+    # ── Master toggle ─────────────────────────────────────────────────────────
+
+    def _toggle_active(self) -> None:
+        self._active = not self._active
+        if self._active:
+            self._pause_btn.setText("⏸  Pause")
+            self._pause_btn.setObjectName("headerButton")
+        else:
+            self._pause_btn.setText("▶  Resume")
+            self._pause_btn.setObjectName("pausedButton")
+        self._pause_btn.style().unpolish(self._pause_btn)
+        self._pause_btn.style().polish(self._pause_btn)
+
+    # ── OSC Log ───────────────────────────────────────────────────────────────
+
+    def _toggle_log(self) -> None:
+        visible = not self._log_panel.isVisible()
+        self._log_panel.setVisible(visible)
+        self._log_btn.setText("Log ▴" if visible else "Log ▾")
+
+    def _append_log(self, ok: bool, address: str, args_str: str) -> None:
+        ts = datetime.now().strftime("%H:%M:%S")
+        symbol = "✓" if ok else "✗"
+        line = f"{ts}  {symbol}  {address}"
+        if args_str.strip():
+            line += f"  {args_str.strip()}"
+        self._log_edit.appendPlainText(line)
+
+    # ── System tray ───────────────────────────────────────────────────────────
+
+    def _setup_tray(self) -> None:
+        self._tray = QSystemTrayIcon(self)
+        self._tray.setIcon(QApplication.instance().windowIcon())
+        self._tray.setToolTip("Dispatch")
+
+        menu = QMenu(self)
+        show_action = QAction("Show / Hide", self)
+        show_action.triggered.connect(self._toggle_visibility)
+        menu.addAction(show_action)
+        menu.addSeparator()
+        quit_action = QAction("Quit Dispatch", self)
+        quit_action.triggered.connect(self._quit_app)
+        menu.addAction(quit_action)
+
+        self._tray.setContextMenu(menu)
+        self._tray.activated.connect(self._on_tray_activated)
+        self._tray.show()
+
+    def _toggle_visibility(self) -> None:
+        if self.isVisible():
+            self.hide()
+        else:
+            self.show()
+            self.raise_()
+            self.activateWindow()
+
+    def _on_tray_activated(self, reason) -> None:
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:
+            self._toggle_visibility()
+
+    def _quit_app(self) -> None:
+        self._tray.hide()
+        self._listener.stop()
+        self.config.save()
+        QApplication.quit()
+
     # ── OSC config ────────────────────────────────────────────────────────────
 
     def _apply_osc_config(self) -> None:
@@ -390,7 +534,8 @@ class MainWindow(QMainWindow):
 
     def _send_test_osc(self) -> None:
         self._apply_osc_config()
-        ok, err = self._osc.send("/oscapp/test", "1")
+        ok, err = self._osc.send("/dispatch/test", "1")
+        self._append_log(ok, "/dispatch/test", "1")
         if ok:
             self._set_status("✓ Test message sent", "success")
         else:
@@ -414,14 +559,13 @@ class MainWindow(QMainWindow):
         except Exception as exc:
             self._listener_dot.setObjectName("listenerDotInactive")
             self._listener_lbl.setText(f"Listener error: {exc}")
-            # On macOS, accessibility permission may be needed
             if sys.platform == "darwin":
                 QMessageBox.warning(
                     self,
                     "Accessibility Permission Required",
-                    "OSCApp needs Accessibility access to capture global key events.\n\n"
+                    "Dispatch needs Accessibility access to capture global key events.\n\n"
                     "Open System Settings → Privacy & Security → Accessibility\n"
-                    "and enable OSCApp.",
+                    "and enable Dispatch.",
                 )
 
     # ── Status helper ─────────────────────────────────────────────────────────
@@ -440,6 +584,10 @@ class MainWindow(QMainWindow):
     # ── Window lifecycle ──────────────────────────────────────────────────────
 
     def closeEvent(self, event) -> None:
+        if QSystemTrayIcon.isSystemTrayAvailable() and self._tray.isVisible():
+            self.hide()
+            event.ignore()
+            return
         self._listener.stop()
         self.config.save()
         super().closeEvent(event)

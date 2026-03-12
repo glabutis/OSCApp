@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-"""OSCApp — slide remote → OSC bridge."""
+"""Dispatch — slide remote → OSC bridge."""
 
 import sys
+from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 
 from app.config import AppConfig
 from app.main_window import MainWindow
 from app.theme import STYLESHEET
+
+_ASSETS = Path(__file__).parent / "assets"
 
 
 def main() -> None:
@@ -18,10 +22,23 @@ def main() -> None:
     )
 
     app = QApplication(sys.argv)
-    app.setApplicationName("OSCApp")
-    app.setOrganizationName("OSCApp")
-    app.setApplicationDisplayName("OSCApp")
+    app.setApplicationName("Dispatch")
+    app.setOrganizationName("Dispatch")
+    app.setApplicationDisplayName("Dispatch")
     app.setStyleSheet(STYLESHEET)
+
+    icon = QIcon()
+    iconset = _ASSETS / "Dispatch.iconset"
+    for name in ("icon_16x16.png", "icon_32x32.png", "icon_128x128.png",
+                 "icon_256x256.png", "icon_512x512.png"):
+        p = iconset / name
+        if p.exists():
+            icon.addFile(str(p))
+    if icon.isNull():
+        fallback = _ASSETS / "icon.png"
+        if fallback.exists():
+            icon = QIcon(str(fallback))
+    app.setWindowIcon(icon)
 
     config = AppConfig.load_default()
     window = MainWindow(config)

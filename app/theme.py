@@ -512,4 +512,50 @@ QMessageBox QLabel {{
     border: 1px solid {COLORS["surface1"]};
     border-radius: 6px;
 }}
+
+/* ─── Test (fire OSC) button ────────────────────── */
+#testButton {{
+    background-color: transparent;
+    color: {COLORS["teal"]};
+    border: 1px solid rgba(148, 226, 213, 0.3);
+    border-radius: 5px;
+    padding: 2px;
+    font-size: 12px;
+}}
+#testButton:hover {{
+    background-color: rgba(148, 226, 213, 0.15);
+    border-color: rgba(148, 226, 213, 0.6);
+}}
+#testButton:pressed {{
+    background-color: rgba(148, 226, 213, 0.25);
+}}
+
+/* ─── Paused state button ───────────────────────── */
+#pausedButton {{
+    background-color: rgba(249, 226, 175, 0.15);
+    color: {COLORS["yellow"]};
+    border: 1px solid rgba(249, 226, 175, 0.3);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+}}
+#pausedButton:hover {{
+    background-color: rgba(249, 226, 175, 0.25);
+    border-color: {COLORS["yellow"]};
+}}
+
+/* ─── OSC Log panel ─────────────────────────────── */
+#logPanelFrame {{
+    background-color: {COLORS["crust"]};
+    border-top: 1px solid {COLORS["surface0"]};
+}}
+QPlainTextEdit#oscLogEdit {{
+    background-color: {COLORS["crust"]};
+    color: {COLORS["subtext0"]};
+    border: none;
+    font-family: "SF Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    font-size: 11px;
+    selection-background-color: {COLORS["lavender"]};
+    selection-color: {COLORS["base"]};
+}}
 """

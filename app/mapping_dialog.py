@@ -164,6 +164,13 @@ class MappingDialog(QDialog):
         self._enabled_cb = QCheckBox("Mapping enabled")
         root.addWidget(self._enabled_cb)
 
+        # ── Validation error ──────────────────────────────────────────────────
+        self._error_lbl = QLabel("")
+        self._error_lbl.setObjectName("errorLabel")
+        self._error_lbl.setWordWrap(True)
+        self._error_lbl.setVisible(False)
+        root.addWidget(self._error_lbl)
+
         # ── Buttons ───────────────────────────────────────────────────────────
         btn_row = QHBoxLayout()
         btn_row.addStretch()
@@ -229,6 +236,22 @@ class MappingDialog(QDialog):
         if self._listening:
             self._set_listening(False)
             self.key_capture_cancelled.emit()
+
+        errors = []
+        if not self._mapping.key_str:
+            errors.append("A key binding is required — click Listen and press a key.")
+        addr = self._osc_addr_edit.text().strip()
+        if not addr:
+            errors.append("An OSC address is required.")
+        elif not addr.startswith("/"):
+            errors.append('OSC address must start with "/".')
+
+        if errors:
+            self._error_lbl.setText("  •  " + "\n  •  ".join(errors))
+            self._error_lbl.setVisible(True)
+            return
+
+        self._error_lbl.setVisible(False)
         self.accept()
 
     def reject(self) -> None:
