@@ -26,7 +26,11 @@ class MappingRow(QFrame):
         self._name_lbl.setText(mapping.name)
         self._key_lbl.setText(key_display(mapping.key_str))
         self._set_badge(mapping.press_type)
-        self._osc_lbl.setText(mapping.osc_address or "(no address)")
+        if mapping.toggle_mode and mapping.osc_address_b:
+            self._osc_lbl.setText(f"{mapping.osc_address}  ↕  {mapping.osc_address_b}")
+        else:
+            self._osc_lbl.setText(mapping.osc_address or "(no address)")
+        self._toggle_badge.setVisible(mapping.toggle_mode)
         self._dot_btn.setChecked(mapping.enabled)
         self._refresh_dot(mapping.enabled)
 
@@ -71,8 +75,20 @@ class MappingRow(QFrame):
         self._set_badge(mapping.press_type)
         layout.addWidget(self._badge_lbl)
 
+        # ── Toggle badge ─────────────────────────────────────────────────────
+        self._toggle_badge = QLabel("↕")
+        self._toggle_badge.setObjectName("badgeToggle")
+        self._toggle_badge.setAlignment(Qt.AlignCenter)
+        self._toggle_badge.setToolTip("Toggle mode — alternates between command A and B")
+        self._toggle_badge.setVisible(mapping.toggle_mode)
+        layout.addWidget(self._toggle_badge)
+
         # ── OSC address (stretches to fill) ──────────────────────────────────
-        self._osc_lbl = QLabel(mapping.osc_address or "(no address)")
+        if mapping.toggle_mode and mapping.osc_address_b:
+            osc_text = f"{mapping.osc_address}  ↕  {mapping.osc_address_b}"
+        else:
+            osc_text = mapping.osc_address or "(no address)"
+        self._osc_lbl = QLabel(osc_text)
         self._osc_lbl.setObjectName("mappingOsc")
         layout.addWidget(self._osc_lbl, 1)
 
@@ -80,7 +96,7 @@ class MappingRow(QFrame):
         test_btn = QPushButton("▶")
         test_btn.setObjectName("testButton")
         test_btn.setFixedSize(28, 28)
-        test_btn.setToolTip("Send this OSC command now")
+        test_btn.setToolTip("Send this OSC command now (always fires command A)")
         test_btn.clicked.connect(lambda: self.test_requested.emit(self.mapping_id))
         layout.addWidget(test_btn)
 

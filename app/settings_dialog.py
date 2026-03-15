@@ -4,11 +4,13 @@ import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QButtonGroup,
     QDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QRadioButton,
     QSlider,
     QSpinBox,
     QVBoxLayout,
@@ -32,6 +34,7 @@ class SettingsDialog(QDialog):
     def get_settings(self) -> AppSettings:
         return AppSettings(
             long_press_threshold_ms=self._threshold_spin.value(),
+            theme="light" if self._radio_light.isChecked() else "dark",
         )
 
     # ── Private ───────────────────────────────────────────────────────────────
@@ -40,6 +43,25 @@ class SettingsDialog(QDialog):
         root = QVBoxLayout(self)
         root.setContentsMargins(24, 24, 24, 20)
         root.setSpacing(20)
+
+        # ── Appearance section ────────────────────────────────────────────────
+        root.addWidget(self._section_label("APPEARANCE"))
+
+        theme_row = QHBoxLayout()
+        theme_row.setSpacing(20)
+        self._radio_dark = QRadioButton("Dark")
+        self._radio_light = QRadioButton("Light")
+        self._theme_group = QButtonGroup(self)
+        self._theme_group.addButton(self._radio_dark)
+        self._theme_group.addButton(self._radio_light)
+        theme_row.addWidget(self._radio_dark)
+        theme_row.addWidget(self._radio_light)
+        theme_row.addStretch()
+        root.addLayout(theme_row)
+
+        divider = QFrame()
+        divider.setObjectName("divider")
+        root.addWidget(divider)
 
         # ── Input section ────────────────────────────────────────────────────
         root.addWidget(self._section_label("INPUT"))
@@ -120,6 +142,10 @@ class SettingsDialog(QDialog):
     def _populate(self, settings: AppSettings) -> None:
         self._threshold_spin.setValue(settings.long_press_threshold_ms)
         self._threshold_slider.setValue(settings.long_press_threshold_ms)
+        if settings.theme == "light":
+            self._radio_light.setChecked(True)
+        else:
+            self._radio_dark.setChecked(True)
 
     @staticmethod
     def _section_label(text: str) -> QLabel:

@@ -1,6 +1,6 @@
-# Catppuccin Mocha-inspired dark theme
+# Catppuccin Mocha (dark) and Latte (light) themes
 
-COLORS = {
+DARK_COLORS = {
     "base": "#1e1e2e",
     "mantle": "#181825",
     "crust": "#11111b",
@@ -23,20 +23,49 @@ COLORS = {
     "teal": "#94e2d5",
 }
 
-STYLESHEET = f"""
+LIGHT_COLORS = {
+    "base": "#eff1f5",
+    "mantle": "#e6e9ef",
+    "crust": "#dce0e8",
+    "surface0": "#ccd0da",
+    "surface1": "#bcc0cc",
+    "surface2": "#acb0be",
+    "overlay0": "#9ca0b0",
+    "overlay1": "#8c8fa1",
+    "text": "#4c4f69",
+    "subtext0": "#6c6f85",
+    "subtext1": "#5c5f77",
+    "lavender": "#7287fd",
+    "blue": "#1e66f5",
+    "sapphire": "#209fb5",
+    "green": "#40a02b",
+    "yellow": "#df8e1d",
+    "peach": "#fe640b",
+    "red": "#d20f39",
+    "mauve": "#8839ef",
+    "teal": "#179299",
+}
+
+# Keep a reference to current colors for any module that imports COLORS directly
+COLORS = DARK_COLORS
+
+
+def get_stylesheet(theme: str = "dark") -> str:
+    C = LIGHT_COLORS if theme == "light" else DARK_COLORS
+    return f"""
 /* ─── Base ─────────────────────────────────────── */
 QMainWindow, QDialog {{
-    background-color: {COLORS["base"]};
-    color: {COLORS["text"]};
+    background-color: {C["base"]};
+    color: {C["text"]};
 }}
 
 QWidget {{
     background-color: transparent;
-    color: {COLORS["text"]};
+    color: {C["text"]};
     font-family: "SF Pro Display", "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     font-size: 13px;
-    selection-background-color: {COLORS["lavender"]};
-    selection-color: {COLORS["base"]};
+    selection-background-color: {C["lavender"]};
+    selection-color: {C["base"]};
 }}
 
 /* ─── Scrollbars ────────────────────────────────── */
@@ -46,12 +75,12 @@ QScrollBar:vertical {{
     margin: 0;
 }}
 QScrollBar::handle:vertical {{
-    background: {COLORS["surface1"]};
+    background: {C["surface1"]};
     border-radius: 3px;
     min-height: 20px;
 }}
 QScrollBar::handle:vertical:hover {{
-    background: {COLORS["surface2"]};
+    background: {C["surface2"]};
 }}
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
     height: 0;
@@ -63,22 +92,22 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
 
 /* ─── QFrame sections ───────────────────────────── */
 #headerFrame {{
-    background-color: {COLORS["mantle"]};
-    border-bottom: 1px solid {COLORS["surface0"]};
+    background-color: {C["mantle"]};
+    border-bottom: 1px solid {C["surface0"]};
 }}
 
 #sectionFrame {{
-    background-color: {COLORS["mantle"]};
-    border-bottom: 1px solid {COLORS["surface0"]};
+    background-color: {C["mantle"]};
+    border-bottom: 1px solid {C["surface0"]};
 }}
 
 #mappingsSectionOuter {{
-    background-color: {COLORS["base"]};
+    background-color: {C["base"]};
 }}
 
 #statusBarFrame {{
-    background-color: {COLORS["mantle"]};
-    border-top: 1px solid {COLORS["surface0"]};
+    background-color: {C["mantle"]};
+    border-top: 1px solid {C["surface0"]};
 }}
 
 #colHeader {{
@@ -91,119 +120,119 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
 
 /* ─── Mapping rows ──────────────────────────────── */
 #mappingRow {{
-    background-color: {COLORS["surface0"]};
-    border: 1px solid {COLORS["surface1"]};
+    background-color: {C["surface0"]};
+    border: 1px solid {C["surface1"]};
     border-radius: 8px;
 }}
 #mappingRow:hover {{
-    background-color: {COLORS["surface1"]};
-    border: 1px solid {COLORS["surface2"]};
+    background-color: {C["surface1"]};
+    border: 1px solid {C["surface2"]};
 }}
 
 /* ─── Labels ────────────────────────────────────── */
 #headerIcon {{
-    color: {COLORS["lavender"]};
+    color: {C["lavender"]};
     font-size: 22px;
 }}
 #headerTitle {{
-    color: {COLORS["text"]};
+    color: {C["text"]};
     font-size: 17px;
     font-weight: 600;
 }}
 #sectionLabel {{
-    color: {COLORS["overlay1"]};
+    color: {C["overlay1"]};
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 1px;
 }}
 #colHeaderLabel {{
-    color: {COLORS["overlay0"]};
+    color: {C["overlay0"]};
     font-size: 11px;
     font-weight: 600;
 }}
 #mappingName {{
-    color: {COLORS["text"]};
+    color: {C["text"]};
     font-weight: 500;
 }}
 #mappingKey {{
-    color: {COLORS["subtext0"]};
+    color: {C["subtext0"]};
     font-family: "SF Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
     font-size: 12px;
 }}
 #mappingOsc {{
-    color: {COLORS["blue"]};
+    color: {C["blue"]};
     font-family: "SF Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
     font-size: 12px;
 }}
 #fieldLabel {{
-    color: {COLORS["subtext0"]};
+    color: {C["subtext0"]};
     font-size: 12px;
 }}
 #statusText {{
-    color: {COLORS["subtext0"]};
+    color: {C["subtext0"]};
     font-size: 12px;
 }}
 #listenerStatus {{
-    color: {COLORS["subtext0"]};
+    color: {C["subtext0"]};
     font-size: 12px;
 }}
 #lastAction {{
-    color: {COLORS["subtext0"]};
+    color: {C["subtext0"]};
     font-size: 12px;
     font-family: "SF Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
 }}
 #dialogSectionLabel {{
-    color: {COLORS["overlay1"]};
+    color: {C["overlay1"]};
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 1px;
 }}
 #hintLabel {{
-    color: {COLORS["overlay0"]};
+    color: {C["overlay0"]};
     font-size: 11px;
 }}
 #captureLabel {{
-    color: {COLORS["yellow"]};
+    color: {C["yellow"]};
     font-size: 12px;
     font-style: italic;
 }}
 #keyDisplayLabel {{
-    color: {COLORS["teal"]};
+    color: {C["teal"]};
     font-family: "SF Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
     font-size: 13px;
     font-weight: 600;
 }}
 #warningLabel {{
-    color: {COLORS["yellow"]};
+    color: {C["yellow"]};
     font-size: 12px;
 }}
 #errorLabel {{
-    color: {COLORS["red"]};
+    color: {C["red"]};
     font-size: 12px;
 }}
 
 /* ─── Status dots ───────────────────────────────── */
 #statusDotActive {{
-    color: {COLORS["green"]};
+    color: {C["green"]};
     font-size: 10px;
 }}
 #statusDotInactive {{
-    color: {COLORS["surface2"]};
+    color: {C["surface2"]};
     font-size: 10px;
 }}
 #listenerDotActive {{
-    color: {COLORS["green"]};
+    color: {C["green"]};
     font-size: 10px;
 }}
 #listenerDotInactive {{
-    color: {COLORS["red"]};
+    color: {C["red"]};
     font-size: 10px;
 }}
 
 /* ─── Type badges ───────────────────────────────── */
 #badgeShort {{
     background-color: rgba(137, 180, 250, 0.15);
-    color: {COLORS["blue"]};
+    color: {C["blue"]};
     border: 1px solid rgba(137, 180, 250, 0.3);
     border-radius: 4px;
     padding: 1px 4px;
@@ -212,7 +241,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
 }}
 #badgeLong {{
     background-color: rgba(203, 166, 247, 0.15);
-    color: {COLORS["mauve"]};
+    color: {C["mauve"]};
     border: 1px solid rgba(203, 166, 247, 0.3);
     border-radius: 4px;
     padding: 1px 4px;
@@ -221,7 +250,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
 }}
 #badgeAny {{
     background-color: rgba(148, 226, 213, 0.15);
-    color: {COLORS["teal"]};
+    color: {C["teal"]};
     border: 1px solid rgba(148, 226, 213, 0.3);
     border-radius: 4px;
     padding: 1px 4px;
@@ -237,51 +266,51 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
     padding: 0;
 }}
 #enabledDot[enabled_state="on"] {{
-    color: {COLORS["green"]};
+    color: {C["green"]};
 }}
 #enabledDot[enabled_state="off"] {{
-    color: {COLORS["surface2"]};
+    color: {C["surface2"]};
 }}
 
 /* ─── Buttons ───────────────────────────────────── */
 QPushButton {{
-    background-color: {COLORS["surface0"]};
-    color: {COLORS["text"]};
-    border: 1px solid {COLORS["surface1"]};
+    background-color: {C["surface0"]};
+    color: {C["text"]};
+    border: 1px solid {C["surface1"]};
     border-radius: 6px;
     padding: 6px 14px;
     font-size: 13px;
     font-weight: 500;
 }}
 QPushButton:hover {{
-    background-color: {COLORS["surface1"]};
-    border-color: {COLORS["surface2"]};
+    background-color: {C["surface1"]};
+    border-color: {C["surface2"]};
 }}
 QPushButton:pressed {{
-    background-color: {COLORS["surface2"]};
+    background-color: {C["surface2"]};
 }}
 QPushButton:disabled {{
-    color: {COLORS["overlay0"]};
-    background-color: {COLORS["surface0"]};
-    border-color: {COLORS["surface0"]};
+    color: {C["overlay0"]};
+    background-color: {C["surface0"]};
+    border-color: {C["surface0"]};
 }}
 
 #headerButton {{
     background-color: transparent;
-    color: {COLORS["subtext0"]};
-    border: 1px solid {COLORS["surface1"]};
+    color: {C["subtext0"]};
+    border: 1px solid {C["surface1"]};
     border-radius: 6px;
     padding: 5px 12px;
     font-size: 12px;
 }}
 #headerButton:hover {{
-    background-color: {COLORS["surface0"]};
-    color: {COLORS["text"]};
+    background-color: {C["surface0"]};
+    color: {C["text"]};
 }}
 
 #addButton {{
     background-color: rgba(180, 190, 254, 0.15);
-    color: {COLORS["lavender"]};
+    color: {C["lavender"]};
     border: 1px solid rgba(180, 190, 254, 0.3);
     border-radius: 6px;
     padding: 5px 12px;
@@ -290,26 +319,26 @@ QPushButton:disabled {{
 }}
 #addButton:hover {{
     background-color: rgba(180, 190, 254, 0.25);
-    border-color: {COLORS["lavender"]};
+    border-color: {C["lavender"]};
 }}
 
 #rowButton {{
     background-color: transparent;
-    color: {COLORS["subtext0"]};
-    border: 1px solid {COLORS["surface1"]};
+    color: {C["subtext0"]};
+    border: 1px solid {C["surface1"]};
     border-radius: 5px;
     padding: 3px 8px;
     font-size: 12px;
 }}
 #rowButton:hover {{
-    background-color: {COLORS["surface1"]};
-    color: {COLORS["text"]};
+    background-color: {C["surface1"]};
+    color: {C["text"]};
 }}
 
 #deleteButton {{
     background-color: transparent;
-    color: {COLORS["surface2"]};
-    border: 1px solid {COLORS["surface1"]};
+    color: {C["surface2"]};
+    border: 1px solid {C["surface1"]};
     border-radius: 5px;
     padding: 2px;
     font-size: 12px;
@@ -317,13 +346,13 @@ QPushButton:disabled {{
 }}
 #deleteButton:hover {{
     background-color: rgba(243, 139, 168, 0.15);
-    color: {COLORS["red"]};
+    color: {C["red"]};
     border-color: rgba(243, 139, 168, 0.4);
 }}
 
 #primaryButton {{
-    background-color: {COLORS["lavender"]};
-    color: {COLORS["base"]};
+    background-color: {C["lavender"]};
+    color: {C["base"]};
     border: none;
     border-radius: 6px;
     padding: 7px 20px;
@@ -331,28 +360,28 @@ QPushButton:disabled {{
     font-weight: 600;
 }}
 #primaryButton:hover {{
-    background-color: #c6d0fe;
+    background-color: {C["blue"]};
 }}
 #primaryButton:pressed {{
-    background-color: #a0aeee;
+    background-color: {C["sapphire"]};
 }}
 
 #cancelButton {{
     background-color: transparent;
-    color: {COLORS["subtext0"]};
-    border: 1px solid {COLORS["surface1"]};
+    color: {C["subtext0"]};
+    border: 1px solid {C["surface1"]};
     border-radius: 6px;
     padding: 7px 20px;
     font-size: 13px;
 }}
 #cancelButton:hover {{
-    background-color: {COLORS["surface0"]};
-    color: {COLORS["text"]};
+    background-color: {C["surface0"]};
+    color: {C["text"]};
 }}
 
 #listenButton {{
     background-color: rgba(148, 226, 213, 0.15);
-    color: {COLORS["teal"]};
+    color: {C["teal"]};
     border: 1px solid rgba(148, 226, 213, 0.3);
     border-radius: 6px;
     padding: 6px 14px;
@@ -363,14 +392,14 @@ QPushButton:disabled {{
     background-color: rgba(148, 226, 213, 0.25);
 }}
 #listenButton:disabled {{
-    color: {COLORS["overlay0"]};
+    color: {C["overlay0"]};
     background-color: transparent;
-    border-color: {COLORS["surface1"]};
+    border-color: {C["surface1"]};
 }}
 
 #listeningActiveButton {{
     background-color: rgba(249, 226, 175, 0.15);
-    color: {COLORS["yellow"]};
+    color: {C["yellow"]};
     border: 1px solid rgba(249, 226, 175, 0.4);
     border-radius: 6px;
     padding: 6px 14px;
@@ -380,51 +409,51 @@ QPushButton:disabled {{
 
 /* ─── Inputs ────────────────────────────────────── */
 QLineEdit {{
-    background-color: {COLORS["mantle"]};
-    color: {COLORS["text"]};
-    border: 1px solid {COLORS["surface1"]};
+    background-color: {C["mantle"]};
+    color: {C["text"]};
+    border: 1px solid {C["surface1"]};
     border-radius: 6px;
     padding: 6px 10px;
     font-size: 13px;
-    selection-background-color: {COLORS["lavender"]};
-    selection-color: {COLORS["base"]};
+    selection-background-color: {C["lavender"]};
+    selection-color: {C["base"]};
 }}
 QLineEdit:focus {{
-    border-color: {COLORS["lavender"]};
-    background-color: {COLORS["crust"]};
+    border-color: {C["lavender"]};
+    background-color: {C["crust"]};
 }}
 QLineEdit:disabled {{
-    color: {COLORS["overlay0"]};
-    background-color: {COLORS["surface0"]};
+    color: {C["overlay0"]};
+    background-color: {C["surface0"]};
 }}
 QLineEdit#inputField {{
-    background-color: {COLORS["mantle"]};
+    background-color: {C["mantle"]};
 }}
 
 QSpinBox {{
-    background-color: {COLORS["mantle"]};
-    color: {COLORS["text"]};
-    border: 1px solid {COLORS["surface1"]};
+    background-color: {C["mantle"]};
+    color: {C["text"]};
+    border: 1px solid {C["surface1"]};
     border-radius: 6px;
     padding: 6px 10px;
     font-size: 13px;
 }}
 QSpinBox:focus {{
-    border-color: {COLORS["lavender"]};
+    border-color: {C["lavender"]};
 }}
 QSpinBox::up-button, QSpinBox::down-button {{
-    background-color: {COLORS["surface0"]};
+    background-color: {C["surface0"]};
     border: none;
     width: 18px;
     border-radius: 3px;
 }}
 QSpinBox::up-button:hover, QSpinBox::down-button:hover {{
-    background-color: {COLORS["surface1"]};
+    background-color: {C["surface1"]};
 }}
 
 /* ─── Radio buttons ─────────────────────────────── */
 QRadioButton {{
-    color: {COLORS["text"]};
+    color: {C["text"]};
     font-size: 13px;
     spacing: 6px;
 }}
@@ -432,20 +461,20 @@ QRadioButton::indicator {{
     width: 16px;
     height: 16px;
     border-radius: 8px;
-    border: 2px solid {COLORS["surface2"]};
+    border: 2px solid {C["surface2"]};
     background-color: transparent;
 }}
 QRadioButton::indicator:checked {{
-    border-color: {COLORS["lavender"]};
-    background-color: {COLORS["lavender"]};
+    border-color: {C["lavender"]};
+    background-color: {C["lavender"]};
 }}
 QRadioButton::indicator:hover {{
-    border-color: {COLORS["subtext0"]};
+    border-color: {C["subtext0"]};
 }}
 
 /* ─── Checkboxes ────────────────────────────────── */
 QCheckBox {{
-    color: {COLORS["text"]};
+    color: {C["text"]};
     font-size: 13px;
     spacing: 8px;
 }}
@@ -453,70 +482,70 @@ QCheckBox::indicator {{
     width: 16px;
     height: 16px;
     border-radius: 4px;
-    border: 2px solid {COLORS["surface2"]};
+    border: 2px solid {C["surface2"]};
     background-color: transparent;
 }}
 QCheckBox::indicator:checked {{
-    border-color: {COLORS["lavender"]};
-    background-color: {COLORS["lavender"]};
+    border-color: {C["lavender"]};
+    background-color: {C["lavender"]};
     image: url(none);
 }}
 QCheckBox::indicator:hover {{
-    border-color: {COLORS["subtext0"]};
+    border-color: {C["subtext0"]};
 }}
 
 /* ─── Slider ────────────────────────────────────── */
 QSlider::groove:horizontal {{
-    background: {COLORS["surface1"]};
+    background: {C["surface1"]};
     height: 4px;
     border-radius: 2px;
 }}
 QSlider::handle:horizontal {{
-    background: {COLORS["lavender"]};
+    background: {C["lavender"]};
     width: 16px;
     height: 16px;
     margin: -6px 0;
     border-radius: 8px;
 }}
 QSlider::handle:horizontal:hover {{
-    background: #c6d0fe;
+    background: {C["blue"]};
 }}
 QSlider::sub-page:horizontal {{
-    background: {COLORS["lavender"]};
+    background: {C["lavender"]};
     border-radius: 2px;
 }}
 
 /* ─── Message boxes ─────────────────────────────── */
 QMessageBox {{
-    background-color: {COLORS["base"]};
+    background-color: {C["base"]};
 }}
 QMessageBox QLabel {{
-    color: {COLORS["text"]};
+    color: {C["text"]};
 }}
 
 /* ─── Divider lines ─────────────────────────────── */
 #divider {{
-    background-color: {COLORS["surface0"]};
+    background-color: {C["surface0"]};
     max-height: 1px;
     min-height: 1px;
 }}
 
 /* ─── Dialog panels ─────────────────────────────── */
 #dialogPanel {{
-    background-color: {COLORS["mantle"]};
-    border: 1px solid {COLORS["surface0"]};
+    background-color: {C["mantle"]};
+    border: 1px solid {C["surface0"]};
     border-radius: 8px;
 }}
 #keyDisplayPanel {{
-    background-color: {COLORS["surface0"]};
-    border: 1px solid {COLORS["surface1"]};
+    background-color: {C["surface0"]};
+    border: 1px solid {C["surface1"]};
     border-radius: 6px;
 }}
 
 /* ─── Test (fire OSC) button ────────────────────── */
 #testButton {{
     background-color: transparent;
-    color: {COLORS["teal"]};
+    color: {C["teal"]};
     border: 1px solid rgba(148, 226, 213, 0.3);
     border-radius: 5px;
     padding: 2px;
@@ -533,7 +562,7 @@ QMessageBox QLabel {{
 /* ─── Paused state button ───────────────────────── */
 #pausedButton {{
     background-color: rgba(249, 226, 175, 0.15);
-    color: {COLORS["yellow"]};
+    color: {C["yellow"]};
     border: 1px solid rgba(249, 226, 175, 0.3);
     border-radius: 6px;
     padding: 5px 12px;
@@ -541,21 +570,211 @@ QMessageBox QLabel {{
 }}
 #pausedButton:hover {{
     background-color: rgba(249, 226, 175, 0.25);
-    border-color: {COLORS["yellow"]};
+    border-color: {C["yellow"]};
 }}
 
 /* ─── OSC Log panel ─────────────────────────────── */
 #logPanelFrame {{
-    background-color: {COLORS["crust"]};
-    border-top: 1px solid {COLORS["surface0"]};
+    background-color: {C["crust"]};
+    border-top: 1px solid {C["surface0"]};
 }}
 QPlainTextEdit#oscLogEdit {{
-    background-color: {COLORS["crust"]};
-    color: {COLORS["subtext0"]};
+    background-color: {C["crust"]};
+    color: {C["subtext0"]};
     border: none;
     font-family: "SF Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
     font-size: 11px;
-    selection-background-color: {COLORS["lavender"]};
-    selection-color: {COLORS["base"]};
+    selection-background-color: {C["lavender"]};
+    selection-color: {C["base"]};
+}}
+
+/* ─── Tab widget ────────────────────────────────── */
+QTabWidget::pane {{
+    border: none;
+    background-color: {C["base"]};
+}}
+QTabWidget::tab-bar {{
+    left: 20px;
+}}
+QTabBar {{
+    background-color: {C["mantle"]};
+    border-bottom: 1px solid {C["surface0"]};
+}}
+QTabBar::tab {{
+    background-color: transparent;
+    color: {C["overlay1"]};
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}}
+QTabBar::tab:selected {{
+    color: {C["text"]};
+    border-bottom: 2px solid {C["lavender"]};
+}}
+QTabBar::tab:hover:!selected {{
+    color: {C["subtext1"]};
+    border-bottom: 2px solid {C["surface2"]};
+}}
+
+/* ─── Notification banner ───────────────────────── */
+#notificationBanner {{
+    background-color: rgba(203, 166, 247, 0.12);
+    border-bottom: 1px solid rgba(203, 166, 247, 0.25);
+}}
+#notificationBannerText {{
+    color: {C["mauve"]};
+    font-size: 12px;
+}}
+
+/* ─── Template-locked fields ────────────────────── */
+QLineEdit[templateLocked="true"] {{
+    color: {C["overlay1"]};
+    background-color: {C["surface0"]};
+    border-color: {C["surface0"]};
+}}
+
+/* ─── Template combo ────────────────────────────── */
+QComboBox#templateCombo {{
+    background-color: {C["mantle"]};
+    color: {C["text"]};
+    border: 1px solid {C["surface1"]};
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+}}
+QComboBox#templateCombo:focus {{
+    border-color: {C["lavender"]};
+}}
+QComboBox#templateCombo::drop-down {{
+    border: none;
+    width: 24px;
+}}
+QComboBox#templateCombo::down-arrow {{
+    width: 10px;
+    height: 10px;
+}}
+QComboBox QAbstractItemView {{
+    background-color: {C["mantle"]};
+    color: {C["text"]};
+    border: 1px solid {C["surface1"]};
+    selection-background-color: {C["surface1"]};
+    selection-color: {C["text"]};
+    outline: none;
+}}
+
+/* ─── Template args label ───────────────────────── */
+#templateArgs {{
+    color: {C["subtext0"]};
+    font-family: "SF Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    font-size: 12px;
+}}
+
+/* ─── Empty state label ─────────────────────────── */
+#emptyStateLabel {{
+    color: {C["overlay0"]};
+    font-size: 13px;
+    padding: 40px 0;
+}}
+
+/* ─── Save-as-template button ───────────────────── */
+#saveTemplateButton {{
+    background-color: rgba(166, 227, 161, 0.10);
+    color: {C["green"]};
+    border: 1px solid rgba(166, 227, 161, 0.25);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+}}
+#saveTemplateButton:hover {{
+    background-color: rgba(166, 227, 161, 0.20);
+    border-color: rgba(166, 227, 161, 0.45);
+}}
+
+/* ─── Profile bar ───────────────────────────────── */
+#profileBarFrame {{
+    background-color: {C["mantle"]};
+    border-bottom: 1px solid {C["surface0"]};
+}}
+
+QComboBox#profileCombo {{
+    background-color: {C["surface0"]};
+    color: {C["text"]};
+    border: 1px solid {C["surface1"]};
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 13px;
+    font-weight: 500;
+}}
+QComboBox#profileCombo:focus {{
+    border-color: {C["lavender"]};
+}}
+QComboBox#profileCombo::drop-down {{
+    border: none;
+    width: 22px;
+}}
+QComboBox#profileCombo::down-arrow {{
+    width: 10px;
+    height: 10px;
+}}
+
+#iconButton {{
+    background-color: transparent;
+    color: {C["subtext0"]};
+    border: 1px solid {C["surface1"]};
+    border-radius: 5px;
+    padding: 2px;
+    font-size: 14px;
+}}
+#iconButton:hover {{
+    background-color: {C["surface1"]};
+    color: {C["text"]};
+}}
+
+/* ─── Toggle badge ──────────────────────────────── */
+#badgeToggle {{
+    background-color: rgba(250, 179, 135, 0.15);
+    color: {C["peach"]};
+    border: 1px solid rgba(250, 179, 135, 0.3);
+    border-radius: 4px;
+    padding: 1px 4px;
+    font-size: 10px;
+    font-weight: 700;
+}}
+
+/* ─── Destination rows ──────────────────────────── */
+#destinationRow {{
+    background-color: transparent;
+}}
+#destinationName {{
+    color: {C["text"]};
+    font-weight: 500;
+    font-size: 13px;
+}}
+#destinationAddr {{
+    color: {C["subtext0"]};
+    font-family: "SF Mono", "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    font-size: 12px;
+}}
+
+/* ─── Test outline button (template dialog) ─────── */
+#testOutlineButton {{
+    background-color: transparent;
+    color: {C["teal"]};
+    border: 1px solid rgba(148, 226, 213, 0.4);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+}}
+#testOutlineButton:hover {{
+    background-color: rgba(148, 226, 213, 0.12);
+    border-color: rgba(148, 226, 213, 0.65);
 }}
 """
+
+# Legacy alias so any code that imports STYLESHEET still works
+STYLESHEET = get_stylesheet("dark")

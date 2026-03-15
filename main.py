@@ -10,7 +10,7 @@ from PySide6.QtGui import QIcon
 
 from app.config import AppConfig
 from app.main_window import MainWindow
-from app.theme import STYLESHEET
+from app.theme import get_stylesheet
 
 _ASSETS = Path(__file__).parent / "assets"
 
@@ -25,8 +25,6 @@ def main() -> None:
     app.setApplicationName("Dispatch")
     app.setOrganizationName("Dispatch")
     app.setApplicationDisplayName("Dispatch")
-    app.setStyleSheet(STYLESHEET)
-
     icon = QIcon()
     iconset = _ASSETS / "Dispatch.iconset"
     for name in ("icon_16x16.png", "icon_32x32.png", "icon_128x128.png",
@@ -41,6 +39,7 @@ def main() -> None:
     app.setWindowIcon(icon)
 
     config = AppConfig.load_default()
+    app.setStyleSheet(get_stylesheet(config.settings.theme))
     window = MainWindow(config)
     window.show()
 
